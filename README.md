@@ -57,3 +57,21 @@ Clone the repository:
 ```bash
 git clone [https://github.com/vaaryapatel/placement-panic-detector.git](https://github.com/vaaryapatel/placement-panic-detector.git)
 cd placement-panic-detector
+
+### 2. Installation
+
+Install dependencies:
+```bash
+pip install google-genai requests beautifulsoup4 pydantic python-dotenv
+
+---
+
+### Pro-Tip: Use a `requirements.txt` file
+Instead of long `pip install` commands, create a file named `requirements.txt` in your project folder with these lines:
+
+```text
+google-genai
+requests
+beautifulsoup4
+pydantic
+python-dotenv
