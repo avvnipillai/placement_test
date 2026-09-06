@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Placement Panic Detector</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <div class="bg-glow bg-glow--one"></div>
+  <div class="bg-glow bg-glow--two"></div>
+  <div class="bg-grid"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark"></span>
+      <span class="brand-name">Placement Panic Detector</span>
+    </div>
+    <div class="topbar-status" id="modeChip">reading signals…</div>
+  </header>
+
+  <main id="stage">
+
+    <!-- ===================== INTAKE VIEW ===================== -->
+    <section id="view-intake" class="view view--intake">
+      <div class="hero">
+        <h1 class="hero-title">
+          Seven days is enough,<br> if you spend them right.
+        </h1>
+        <p class="hero-sub">
+          Feed in where you stand and where you're aiming. Three agents scan live job
+          signals and interview data, then hand you a week you can actually follow.
+        </p>
+      </div>
+
+      <form id="intakeForm" class="console">
+
+        <div class="console-row two-col">
+          <div class="field">
+            <label for="branch">Branch</label>
+            <input type="text" id="branch" name="branch" placeholder="Computer Science" autocomplete="off" required />
+            <svg class="field-icon icon-branch" viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M32 6 L58 20 L32 34 L6 20 Z" class="cap-top"/>
+              <path d="M18 26 v14 c0 6 6.3 11 14 11 s14-5 14-11 V26" class="cap-band"/>
+              <line x1="58" y1="20" x2="58" y2="38" class="cap-string"/>
+              <circle cx="58" cy="41" r="2.6" class="cap-tassel"/>
+            </svg>
+          </div>
+
+          <div class="field">
+            <label for="role">Target role</label>
+            <input type="text" id="role" name="role" placeholder="Software Engineer" autocomplete="off" required />
+            <svg class="field-icon icon-role" viewBox="0 0 64 64" aria-hidden="true">
+              <rect x="10" y="18" width="44" height="30" rx="4" class="role-screen"/>
+              <path d="M22 30 l-7 6 7 6 M42 30 l7 6 -7 6 M35 26 l-6 20" class="role-code"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="console-row">
+          <div class="field field--wide">
+            <label for="cgpa">CGPA <span class="live-val" id="cgpaVal">7.5</span></label>
+            <input type="range" id="cgpa" name="cgpa" min="0" max="10" step="0.1" value="7.5" />
+            <div class="gauge-wrap">
+              <svg viewBox="0 0 200 110" class="gauge">
+                <path d="M10 100 A90 90 0 0 1 190 100" class="gauge-track"/>
+                <path d="M10 100 A90 90 0 0 1 190 100" class="gauge-fill" id="gaugeFill"/>
+                <line x1="100" y1="100" x2="100" y2="28" class="gauge-needle" id="gaugeNeedle"/>
+                <circle cx="100" cy="100" r="6" class="gauge-hub"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="console-row">
+          <div class="field field--wide">
+            <label for="weeks">Weeks until placement season <span class="live-val" id="weeksVal">4</span></label>
+            <input type="range" id="weeks" name="weeks" min="1" max="12" step="1" value="4" />
+            <div class="calendar-strip" id="calendarStrip"></div>
+          </div>
+        </div>
+
+        <div class="console-row">
+          <div class="field field--wide">
+            <label for="companyInput">Target companies <span class="hint">— type a name, press Enter</span></label>
+            <div class="chip-input" id="chipInput">
+              <input type="text" id="companyInput" placeholder="Amazon, TCS, Infosys…" autocomplete="off" />
+            </div>
+            <div class="skyline-wrap">
+              <svg id="skyline" viewBox="0 0 600 130" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+                <line x1="0" y1="122" x2="600" y2="122" class="skyline-ground"/>
+              </svg>
+              <p class="skyline-empty" id="skylineEmpty">Add a company to raise its skyline</p>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-generate" id="generateBtn">
+          <span>Generate my week</span>
+          <svg viewBox="0 0 24 24" class="btn-arrow"><path d="M4 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+        <p class="form-error" id="formError"></p>
+      </form>
+    </section>
+
+    <!-- ===================== LOADING VIEW ===================== -->
+    <section id="view-loading" class="view view--loading hidden">
+      <div class="pipeline">
+        <div class="pipe-node" id="node1">
+          <div class="pipe-dot"></div>
+          <span>Market signals</span>
+        </div>
+        <div class="pipe-line" id="line1"></div>
+        <div class="pipe-node" id="node2">
+          <div class="pipe-dot"></div>
+          <span>Interview insight</span>
+        </div>
+        <div class="pipe-line" id="line2"></div>
+        <div class="pipe-node" id="node3">
+          <div class="pipe-dot"></div>
+          <span>Strategy synth</span>
+        </div>
+      </div>
+      <p class="pipeline-caption" id="pipelineCaption">Scanning live listings…</p>
+    </section>
+
+    <!-- ===================== RESULTS VIEW ===================== -->
+    <section id="view-results" class="view view--results hidden">
+      <div class="bento" id="bento"></div>
+    </section>
+
+  </main>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
