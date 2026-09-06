@@ -57,6 +57,12 @@
   const skylineEmpty = $('#skylineEmpty');
   let companies = [];
 
+  // Ground line sits at y=122; labels are drawn just below it. The
+  // skyline viewBox / container must be at least ~150 tall or the
+  // labels get clipped and appear "missing" - see LABEL_Y usage below.
+  const GROUND_Y = 122;
+  const LABEL_Y = GROUND_Y + 18;
+
   function hashSeed(str){
     let h = 0;
     for (let i = 0; i < str.length; i++){ h = (h * 31 + str.charCodeAt(i)) >>> 0; }
@@ -89,11 +95,11 @@
       const h = 46 + (seed % 62);
       const w = Math.min(70, slot * 0.55);
       const x = idx * slot + (slot - w) / 2;
-      const y = 122 - h;
+      const y = GROUND_Y - h;
       const ns = 'http://www.w3.org/2000/svg';
 
       const rect = document.createElementNS(ns, 'rect');
-      rect.setAttribute('x', x); rect.setAttribute('y', 122);
+      rect.setAttribute('x', x); rect.setAttribute('y', GROUND_Y);
       rect.setAttribute('width', w); rect.setAttribute('height', 0);
       rect.setAttribute('rx', 3);
       rect.setAttribute('class', 'bldg');
@@ -122,10 +128,11 @@
 
       const label = document.createElementNS(ns, 'text');
       label.setAttribute('x', x + w / 2);
-      label.setAttribute('y', 122 + 14);
+      label.setAttribute('y', LABEL_Y);
       label.setAttribute('text-anchor', 'middle');
-      label.setAttribute('fill', '#8b8fa3');
-      label.setAttribute('font-size', '9');
+      label.setAttribute('fill', '#c7cade');
+      label.setAttribute('font-size', '11');
+      label.setAttribute('font-weight', '500');
       label.setAttribute('font-family', 'JetBrains Mono, monospace');
       label.textContent = name.length > 10 ? name.slice(0, 9) + '…' : name;
       skyline.appendChild(label);
@@ -246,7 +253,9 @@
     }
   });
 
-  /* ---------------- Results rendering ---------------- */
+  /* ---------------- Results rendering ----------------
+     Order: summary -> Prepare for this + Skip for now -> 7-day action
+     plan (wide) -> Companies eligible + CGPA gauge. */
   function renderResults(data){
     const { student, brief } = data;
     const bento = $('#bento');
@@ -264,27 +273,6 @@
           <span class="summary-pill">${brief.eligible_companies.length} of ${data.companies.length} companies eligible</span>
           <button class="btn-restart" id="restartBtn">Start over</button>
         </div>
-      </div>
-
-      <div class="card card--skyline">
-        <div class="card-head">
-          <h3 class="card-title">Companies you're eligible for</h3>
-          <span class="card-tag">skyline</span>
-        </div>
-        <svg id="resultSkyline" viewBox="0 0 600 130" preserveAspectRatio="xMidYMax meet"></svg>
-      </div>
-
-      <div class="card card--gauge">
-        <svg viewBox="0 0 200 110" style="width:200px;height:110px;overflow:visible;">
-          <path d="M10 100 A90 90 0 0 1 190 100" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="10" stroke-linecap="round"/>
-          <path d="M10 100 A90 90 0 0 1 190 100" fill="none" stroke="${gaugeColor}" stroke-width="10" stroke-linecap="round"
-            stroke-dasharray="283" stroke-dashoffset="${283 - (student.cgpa / 10) * 283}"/>
-          <line x1="100" y1="100" x2="100" y2="28" stroke="#fff" stroke-width="3" stroke-linecap="round"
-            transform="rotate(${(student.cgpa / 10) * 180 - 90} 100 100)"/>
-          <circle cx="100" cy="100" r="6" fill="#a78bfa"/>
-        </svg>
-        <p class="result-gauge-val">${student.cgpa.toFixed(1)}</p>
-        <p class="result-gauge-label">your CGPA</p>
       </div>
 
       <div class="card card--priority">
@@ -322,6 +310,27 @@
         </div>
         <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
       </div>
+
+      <div class="card card--skyline">
+        <div class="card-head">
+          <h3 class="card-title">Companies you're eligible for</h3>
+          <span class="card-tag">skyline</span>
+        </div>
+        <svg id="resultSkyline" viewBox="0 0 600 150" preserveAspectRatio="xMidYMax meet"></svg>
+      </div>
+
+      <div class="card card--gauge">
+        <svg viewBox="0 0 200 110" style="width:200px;height:110px;overflow:visible;">
+          <path d="M10 100 A90 90 0 0 1 190 100" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="10" stroke-linecap="round"/>
+          <path d="M10 100 A90 90 0 0 1 190 100" fill="none" stroke="${gaugeColor}" stroke-width="10" stroke-linecap="round"
+            stroke-dasharray="283" stroke-dashoffset="${283 - (student.cgpa / 10) * 283}"/>
+          <line x1="100" y1="100" x2="100" y2="28" stroke="#fff" stroke-width="3" stroke-linecap="round"
+            transform="rotate(${(student.cgpa / 10) * 180 - 90} 100 100)"/>
+          <circle cx="100" cy="100" r="6" fill="#a78bfa"/>
+        </svg>
+        <p class="result-gauge-val">${student.cgpa.toFixed(1)}</p>
+        <p class="result-gauge-label">your CGPA</p>
+      </div>
     `;
 
     drawResultSkyline(brief.eligible_companies);
@@ -345,8 +354,8 @@
     const ns = 'http://www.w3.org/2000/svg';
     const svg = $('#resultSkyline');
     const ground = document.createElementNS(ns, 'line');
-    ground.setAttribute('x1', 0); ground.setAttribute('y1', 122);
-    ground.setAttribute('x2', 600); ground.setAttribute('y2', 122);
+    ground.setAttribute('x1', 0); ground.setAttribute('y1', GROUND_Y);
+    ground.setAttribute('x2', 600); ground.setAttribute('y2', GROUND_Y);
     ground.setAttribute('stroke', 'rgba(255,255,255,0.12)');
     svg.appendChild(ground);
 
@@ -357,7 +366,7 @@
       const h = 50 + (seed % 60);
       const w = Math.min(80, slot * 0.55);
       const x = idx * slot + (slot - w) / 2;
-      const y = 122 - h;
+      const y = GROUND_Y - h;
       const rect = document.createElementNS(ns, 'rect');
       rect.setAttribute('x', x); rect.setAttribute('y', y);
       rect.setAttribute('width', w); rect.setAttribute('height', h);
@@ -368,10 +377,11 @@
 
       const label = document.createElementNS(ns, 'text');
       label.setAttribute('x', x + w / 2);
-      label.setAttribute('y', 122 + 14);
+      label.setAttribute('y', LABEL_Y);
       label.setAttribute('text-anchor', 'middle');
-      label.setAttribute('fill', '#a9adc2');
-      label.setAttribute('font-size', '10');
+      label.setAttribute('fill', '#c7cade');
+      label.setAttribute('font-size', '12');
+      label.setAttribute('font-weight', '500');
       label.setAttribute('font-family', 'JetBrains Mono, monospace');
       label.textContent = name.length > 12 ? name.slice(0, 11) + '…' : name;
       svg.appendChild(label);
